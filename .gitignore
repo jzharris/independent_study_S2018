@@ -1,0 +1,16 @@
+#Jetbrains files
+.idea/
+
+# Ignore any ndjson or bin files -> can add exceptions with !folder/*.ndjson
+*.ndjson
+*.bin
+*.npy
+
+# Ignore any large output folders
+datasets/
+out/
+out-*/
+logs/
+weights/
+weights-*/
+exports/
