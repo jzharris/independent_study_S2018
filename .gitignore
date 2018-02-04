@@ -16,4 +16,10 @@ weights-*/
 exports/
 
 # Other repositories
-Pokemon_GAN/
+Pokemon_GAN/data/
+Pokemon_GAN/images/
+Pokemon_GAN/newPokemon/
+Pokemon_GAN/model
+Pokemon_GAN/*.ipynb
+Pokemon_GAN/*.md
+Pokemon_GAN/*.jpg
