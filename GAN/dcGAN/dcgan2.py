@@ -21,7 +21,7 @@ from import_cifar10 import import_cifar10
 from keras.models import model_from_json
 
 # fix random seed for reproducibility
-np.random.seed(7)
+# np.random.seed(7)
 
 
 class ElapsedTimer(object):
@@ -214,6 +214,7 @@ class CIFAR10_DCGAN(object):
         noise_input = None
         if save_interval > 0:
             noise_input = np.random.uniform(0, 1.0, size=[16, 100])
+        gen_interval = int(save_interval/10)
         for j in range(epochs):
             for i in range(batch_num):
                 images_train = self.x_train[np.random.randint(0,
@@ -228,15 +229,16 @@ class CIFAR10_DCGAN(object):
                 y = np.ones([batch_size, 1])
                 noise = np.random.uniform(0, 1.0, size=[batch_size, 100])
                 a_loss = self.adversarial.train_on_batch(noise, y)
-                log_mesg = "%d: [D loss: %f, acc: %f]" % (i, d_loss[0], d_loss[1])
+                log_mesg = "%d, %d: [D loss: %f, acc: %f]" % (j+1, i+1, d_loss[0], d_loss[1])
                 log_mesg = "%s  [A loss: %f, acc: %f]" % (log_mesg, a_loss[0], a_loss[1])
                 print(log_mesg)
-                if save_interval > 0:
-                    if (i+1) % save_interval == 0:
-                        self.plot_images(save2file=True, samples=noise_input.shape[0], noise=noise_input, step=(i+1))
-                        self.save_weights(self.discriminator, self.save_discr)
-                        self.save_weights(self.adversarial, self.save_adver)
-                        self.save_weights(self.generator, self.save_gener)
+            if save_interval > 0:
+                if (j+1) % gen_interval == 0:
+                    self.plot_images(save2file=True, samples=noise_input.shape[0], noise=noise_input, step=(j + 1))
+                if (j+1) % save_interval == 0:
+                    self.save_weights(self.discriminator, self.save_discr)
+                    self.save_weights(self.adversarial, self.save_adver)
+                    self.save_weights(self.generator, self.save_gener)
 
 
     def plot_images(self, save2file=False, fake=True, samples=16, noise=None, step=0):
@@ -293,5 +295,5 @@ if __name__ == '__main__':
     timer = ElapsedTimer()
     dcgan.train(epochs=100000, batch_size=256, save_interval=1000)
     timer.elapsed_time()
-    dcgan.plot_images(fake=True)
-    dcgan.plot_images(fake=False, save2file=True)
+    # dcgan.plot_images(fake=True)
+    # dcgan.plot_images(fake=False, save2file=True)

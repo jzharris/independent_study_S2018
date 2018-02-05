@@ -12,7 +12,7 @@ import scipy.misc
 from utils import *
 
 # fix random seed for reproducibility
-np.random.seed(7)
+# np.random.seed(7)
 
 slim = tf.contrib.slim
 
@@ -22,10 +22,10 @@ EPOCH = 100000
 # os.environ['CUDA_VISIBLE_DEVICES'] = '15'
 version = 'newPokemon'
 newPoke_path = './' + version
-previous_epochs = 10000
+previous_epochs = 0
 
 def lrelu(x, n, leak=0.2): 
-    return tf.maximum(x, leak * x, name=n)
+    return tf.maximum(x, leak * x, name=n) 
  
 def process_data():   
     current_dir = os.getcwd()
@@ -34,8 +34,9 @@ def process_data():
     images = []
     for each in os.listdir(pokemon_dir):
         images.append(os.path.join(pokemon_dir,each))
-    # print images    
+    # print images
     all_images = tf.convert_to_tensor(images, dtype = tf.string)
+    print(all_images.get_shape())
     
     images_queue = tf.train.slice_input_producer(
                                         [all_images])
@@ -44,9 +45,9 @@ def process_data():
     image = tf.image.decode_jpeg(content, channels = CHANNEL)
     # sess1 = tf.Session()
     # print sess1.run(image)
-    image = tf.image.random_flip_left_right(image)
-    image = tf.image.random_brightness(image, max_delta = 0.1)
-    image = tf.image.random_contrast(image, lower = 0.9, upper = 1.1)
+    # image = tf.image.random_flip_left_right(image)
+    # image = tf.image.random_brightness(image, max_delta = 0.1) **
+    # image = tf.image.random_contrast(image, lower = 1, upper = 1.1) **
     # noise = tf.Variable(tf.truncated_normal(shape = [HEIGHT,WIDTH,CHANNEL], dtype = tf.float32, stddev = 1e-3, name = 'noise')) 
     # print image.get_shape()
     size = [HEIGHT, WIDTH]
@@ -91,7 +92,7 @@ def generator(input, random_dim, is_train, reuse=False):
         bn2 = tf.contrib.layers.batch_norm(conv2, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn2')
         act2 = tf.nn.relu(bn2, name='act2')
         # 16*16*128
-        conv3 = tf.layers.conv2d_transpose(act2, c16, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
+        conv3 = tf.layers.conv2d_transpose(act2, c16, kernel_size=[3, 3], strides=[2, 2], padding="SAME",
                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                            name='conv3')
         bn3 = tf.contrib.layers.batch_norm(conv3, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn3')
@@ -103,7 +104,7 @@ def generator(input, random_dim, is_train, reuse=False):
         bn4 = tf.contrib.layers.batch_norm(conv4, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn4')
         act4 = tf.nn.relu(bn4, name='act4')
         # 64*64*32
-        conv5 = tf.layers.conv2d_transpose(act4, c64, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
+        conv5 = tf.layers.conv2d_transpose(act4, c64, kernel_size=[3, 3], strides=[2, 2], padding="SAME",
                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                            name='conv5')
         bn5 = tf.contrib.layers.batch_norm(conv5, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn5')
@@ -131,7 +132,7 @@ def discriminator(input, is_train, reuse=False):
         bn1 = tf.contrib.layers.batch_norm(conv1, is_training = is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope = 'bn1')
         act1 = lrelu(conv1, n='act1')
          #Convolution, activation, bias, repeat! 
-        conv2 = tf.layers.conv2d(act1, c4, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
+        conv2 = tf.layers.conv2d(act1, c4, kernel_size=[3, 3], strides=[2, 2], padding="SAME",
                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                  name='conv2')
         bn2 = tf.contrib.layers.batch_norm(conv2, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn2')
@@ -143,16 +144,16 @@ def discriminator(input, is_train, reuse=False):
         bn3 = tf.contrib.layers.batch_norm(conv3, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn3')
         act3 = lrelu(bn3, n='act3')
          #Convolution, activation, bias, repeat! 
-        conv4 = tf.layers.conv2d(act3, c16, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
+        conv4 = tf.layers.conv2d(act3, c16, kernel_size=[3, 3], strides=[2, 2], padding="SAME",
                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                  name='conv4')
         bn4 = tf.contrib.layers.batch_norm(conv4, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn4')
         act4 = lrelu(bn4, n='act4')
-       
+
         # start from act4
         dim = int(np.prod(act4.get_shape()[1:]))
         fc1 = tf.reshape(act4, shape=[-1, dim], name='fc1')
-      
+
         
         w2 = tf.get_variable('w2', shape=[fc1.shape[-1], 1], dtype=tf.float32,
                              initializer=tf.truncated_normal_initializer(stddev=0.02))
@@ -211,9 +212,7 @@ def train(load_local=False):
         saver = tf.train.Saver(variables_to_restore)
         ckpt = tf.train.latest_checkpoint('./model/' + version)
         print(ckpt)
-        if ckpt is 'None':
-            print('no checkpoint')
-        else:
+        if ckpt is not None:
             print('last checkpoint: {}'.format(ckpt))
             saver.restore(sess, ckpt)
     else:
@@ -229,7 +228,6 @@ def train(load_local=False):
     for i in range(EPOCH):
         print(i+previous_epochs)
         for j in range(batch_num):
-            print(j)
             d_iters = 5
             g_iters = 1
 
@@ -250,14 +248,14 @@ def train(load_local=False):
                 _, gLoss = sess.run([trainer_g, g_loss],
                                     feed_dict={random_input: train_noise, is_train: True})
 
-            print ('train:[%d/%d],d_loss:%f,g_loss:%f' % (i+1, EPOCH, dLoss, gLoss))
+            print ('train:[%d/%d],d_loss:%f,g_loss:%f' % (i+1, j+1, dLoss, gLoss))
 
         # save check point every 500 epoch
         if (i+previous_epochs+1)%500 == 0:
             if not os.path.exists('./model/' + version):
                 os.makedirs('./model/' + version)
             saver.save(sess, './model/' +version + '/' + str(i+previous_epochs+1))
-        if (i+previous_epochs+1)%100 == 0:
+        if (i+previous_epochs+1)%50 == 0:
             # save images
             if not os.path.exists(newPoke_path):
                 os.makedirs(newPoke_path)
