@@ -23,3 +23,5 @@ Pokemon_GAN/model
 Pokemon_GAN/*.ipynb
 Pokemon_GAN/*.md
 Pokemon_GAN/*.jpg
+
+models/

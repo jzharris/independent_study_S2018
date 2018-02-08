@@ -86,13 +86,13 @@ def generator(input, random_dim, is_train, reuse=False):
         act1 = tf.nn.relu(bn1, name='act1')
         # 8*8*256
         #Convolution, bias, activation, repeat! 
-        conv2 = tf.layers.conv2d_transpose(act1, c8, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
+        conv2 = tf.layers.conv2d_transpose(act1, c8, kernel_size=[7, 7], strides=[2, 2], padding="SAME",
                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                            name='conv2')
         bn2 = tf.contrib.layers.batch_norm(conv2, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn2')
         act2 = tf.nn.relu(bn2, name='act2')
         # 16*16*128
-        conv3 = tf.layers.conv2d_transpose(act2, c16, kernel_size=[3, 3], strides=[2, 2], padding="SAME",
+        conv3 = tf.layers.conv2d_transpose(act2, c16, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                            name='conv3')
         bn3 = tf.contrib.layers.batch_norm(conv3, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn3')
@@ -104,7 +104,7 @@ def generator(input, random_dim, is_train, reuse=False):
         bn4 = tf.contrib.layers.batch_norm(conv4, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn4')
         act4 = tf.nn.relu(bn4, name='act4')
         # 64*64*32
-        conv5 = tf.layers.conv2d_transpose(act4, c64, kernel_size=[3, 3], strides=[2, 2], padding="SAME",
+        conv5 = tf.layers.conv2d_transpose(act4, c64, kernel_size=[5, 5], strides=[2, 2], padding="SAME",
                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.02),
                                            name='conv5')
         bn5 = tf.contrib.layers.batch_norm(conv5, is_training=is_train, epsilon=1e-5, decay = 0.9,  updates_collections=None, scope='bn5')
@@ -306,6 +306,6 @@ def test():
 
 
 if __name__ == "__main__":
-    train(load_local=True)
-    # test()
+    # train(load_local=True)
+    test()
 
