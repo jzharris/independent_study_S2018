@@ -7,7 +7,9 @@ from keras.layers import Conv2D, Conv2DTranspose
 from keras.models import Model
 from keras import backend as K
 from keras import metrics
+
 from keras.datasets import cifar10
+from import_cifar10 import *
 
 import os
 import os.path as path
@@ -29,16 +31,31 @@ def load_weights(model, filename):
 
     return model
 
-model_name = "vae_conv"
+from keras.callbacks import TensorBoard
+def tensorboard():
+    # starting tensorboard: tensorboard --logdir=run1:logs/ --port 6006
+    if not path.exists('logs'):
+        os.mkdir('logs')
+    print('--- enabling TensorBoard')
+    return TensorBoard(log_dir='logs', histogram_freq=0, write_graph=True, write_images=True)
+
+from keras.callbacks import ModelCheckpoint
+def checkpoint():
+    # records checkpoints per EPOCH using keras
+    print('--- enabling ModelCheckpoint')
+    check_path = 'weights/{}_weights.h5'.format(model_name)
+    return ModelCheckpoint(check_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
+
+model_name = "vae_conv_10"
 batch_size = 256
 latent_dim = 2
-intermediate_dim = 128
-epochs = 400
+intermediate_dim = 256
+epochs = 10000
 epsilon_std = 1.0
 
 img_rows, img_cols, img_chns = 32, 32, 3
-filters = 32
-num_conv = 3
+filters = 256
+num_conv = 5
 
 # tensorflow uses channels_last
 # theano uses channels_first
@@ -55,11 +72,11 @@ conv_2 = Conv2D(filters,
                 kernel_size=(2, 2),
                 padding='same', activation='relu',
                 strides=(2, 2))(conv_1)
-conv_3 = Conv2D(filters,
+conv_3 = Conv2D(int(filters/2),
                 kernel_size=num_conv,
                 padding='same', activation='relu',
                 strides=1)(conv_2)
-conv_4 = Conv2D(filters,
+conv_4 = Conv2D(int(filters/4),
                 kernel_size=num_conv,
                 padding='same', activation='relu',
                 strides=1)(conv_3)
@@ -90,12 +107,12 @@ else:
     output_shape = (batch_size, int(img_rows / 2), int(img_cols / 2), filters)
 
 decoder_reshape = Reshape(output_shape[1:])
-decoder_deconv_1 = Conv2DTranspose(filters,
+decoder_deconv_1 = Conv2DTranspose(int(filters/4),
                                    kernel_size=num_conv,
                                    padding='same',
                                    strides=1,
                                    activation='relu')
-decoder_deconv_2 = Conv2DTranspose(filters,
+decoder_deconv_2 = Conv2DTranspose(int(filters/2),
                                    kernel_size=num_conv,
                                    padding='same',
                                    strides=1,
@@ -146,34 +163,30 @@ vae.summary()
 
 
 # load dataset
-(x_train, _), (x_test, y_test) = cifar10.load_data()
-x_train = x_train.astype('float32') / 255.
-x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
-x_test = x_test.astype('float32') / 255.
-x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
-y_test = y_test.reshape((len(y_test)))
+# (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+# x_train = x_train.astype('float32') / 255.
+# x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
+# x_test = x_test.astype('float32') / 255.
+# x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
+# y_train = y_train.reshape((len(y_train)))
+x_train, x_test = import_cifar10(1, False)
 
 ########################################################################
-from keras.callbacks import TensorBoard
-
-vae.fit(x_train,
-        shuffle=True,
-        epochs=epochs,
-        batch_size=batch_size,
-        validation_data=(x_test, None),
-        callbacks=[TensorBoard(log_dir='logs/{}'.format(model_name))])
-
-# save weights!
-save_weights(vae, model_name)
+# vae.fit(x_train,
+#         shuffle=True,
+#         epochs=epochs,
+#         batch_size=batch_size,
+#         validation_data=(x_test, None),
+#         callbacks=[tensorboard(), checkpoint()])
 ########################################################################
 
 # build a model to project inputs on the latent space
 encoder = Model(x, z_mean)
 
 # display a 2D plot of the digit classes in the latent space
-x_test_encoded = encoder.predict(x_test, batch_size=batch_size)
+x_test_encoded = encoder.predict(x_train, batch_size=batch_size)
 plt.figure(figsize=(6, 6))
-plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=y_test)
+plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=np.ones((x_train.shape[0]))) #np.ones((x_train.shape[0])) | y_train
 plt.colorbar()
 plt.show()
 

@@ -26,7 +26,9 @@ def load_cifar10():
 
 
 def export_cifar10(category=0):
-    print(x_train.shape)
+    if not path.exists('datasets/cifar10'):
+        os.mkdir('datasets/cifar10')
+
     filter_train = None
     for i in range(y_train.shape[0]):
         if (i % 100 == 0):
@@ -43,24 +45,49 @@ def export_cifar10(category=0):
                 filter_train = np.append(filter_train,
                                          np.reshape(x_train[i], (1, 32, 32, 3)),
                                          axis=0)
-    images = filter_train[:16]
-    print(images.shape)
-    # create a grid of 3x3 images
-    plt.figure(figsize=(10, 10))
-    for i in range(images.shape[0]):
-        plt.subplot(4, 4, i + 1)
-        plt.imshow(toimage(images[i]))
-        plt.axis('off')
-    plt.tight_layout()
-    plt.show()
+    # images = filter_train[:16]
+    # print(images.shape)
+    # # create a grid of 3x3 images
+    # plt.figure(figsize=(10, 10))
+    # for i in range(images.shape[0]):
+    #     plt.subplot(4, 4, i + 1)
+    #     plt.imshow(toimage(images[i]))
+    #     plt.axis('off')
+    # plt.tight_layout()
+    # plt.show()
 
-    if not path.exists('datasets/cifar10'):
-        os.mkdir('datasets/cifar10')
+    np.save('datasets/cifar10/x_train_{}.npy'.format(category), filter_train)
 
-    np.save('datasets/cifar10/set_{}.npy'.format(category), filter_train)
+    # filter_test = None
+    # for i in range(y_test.shape[0]):
+    #     if (i % 100 == 0):
+    #         print('{} / {}'.format(i, y_test.shape[0]))
+    #         # if (filter_test is not None):
+    #         #     if (filter_test.shape[0] > 15):
+    #         #         break
+    #     if (y_test[i][category] == 1):
+    #         if (filter_test is None):
+    #             print(x_test[1].shape)
+    #             filter_test = np.array(
+    #                 np.reshape(x_test[i], (1, 32, 32, 3)))
+    #         else:
+    #             filter_test = np.append(filter_test,
+    #                                      np.reshape(x_test[i], (1, 32, 32, 3)),
+    #                                      axis=0)
+    # images = filter_test[:16]
+    # print(images.shape)
+    # # create a grid of 3x3 images
+    # plt.figure(figsize=(10, 10))
+    # for i in range(images.shape[0]):
+    #     plt.subplot(4, 4, i + 1)
+    #     plt.imshow(toimage(images[i]))
+    #     plt.axis('off')
+    # plt.tight_layout()
+    # plt.show()
+    # np.save('datasets/cifar10/x_test_{}.npy'.format(category), filter_test)
 
 
-x_train, y_train, _, _ = load_cifar10()
+x_train, y_train, x_test, y_test = load_cifar10()
 export_cifar10(0)
 export_cifar10(1)
 export_cifar10(2)
