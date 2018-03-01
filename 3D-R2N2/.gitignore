@@ -1,0 +1,14 @@
+# Python cache
+*.pyc
+py3/
+
+# OS X temporary metadata
+._*
+*.DS_Store
+
+# Wiki page
+wiki/
+
+# Results
+output/
+out/

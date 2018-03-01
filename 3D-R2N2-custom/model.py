@@ -1,5 +1,5 @@
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten, LeakyReLU
-from keras.layers import Add, ConvLSTM2D, Conv3D, UpSampling3D, Merge
+from keras.layers import Add, ConvLSTM2D, Conv3D, UpSampling3D, Merge, UpSampling2D, Reshape
 from keras.layers import TimeDistributed
 
 from keras.models import Model, Sequential
@@ -9,29 +9,127 @@ from keras import backend as K
 n_convfilter = [96, 128, 256, 256, 256, 256]
 n_fc_filters = [1024]
 n_lstm_kernel = [4]
-n_deconvfilter = [128, 128, 128, 64, 32, 2]
+# n_deconvfilter = [256, 128, 128, 128, 64, 32, 2]
+n_deconvfilter = [64, 64, 32, 2]
 
 timesteps = 8
 x = (timesteps, 512, 512, 3)  # using `channels_last` image data format
 
 #...make this work?
-model1  = Sequential()
-model1.add(TimeDistributed(Conv2D(n_convfilter[0], (7, 7)), input_shape=x))
-model1.add(TimeDistributed(LeakyReLU(alpha=.01)))
-model1.add(TimeDistributed(Conv2D(n_convfilter[0], (3, 3))))
-model1.add(TimeDistributed(LeakyReLU(alpha=.01)))
-model1.add(TimeDistributed(MaxPooling2D((2, 2))))
+model = Sequential()
+model.add(TimeDistributed(Conv2D(n_convfilter[0], (7, 7)), input_shape=x))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(Conv2D(n_convfilter[0], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(MaxPooling2D((2, 2))))
+print(model.output_shape)
 
-model1.add(TimeDistributed(Conv2D(n_convfilter[1], (3, 3))))
-model1.add(TimeDistributed(LeakyReLU(alpha=.01)))
-model1.add(TimeDistributed(Conv2D(n_convfilter[1], (3, 3))))
-model1.add(TimeDistributed(LeakyReLU(alpha=.01)))
-model1.add(TimeDistributed(Conv2D(n_convfilter[1], (1, 1))))
-model2 = Sequential()
-model2.add(TimeDistributed(Conv2D(n_convfilter[1], (1, 1,))))
+model.add(TimeDistributed(Conv2D(n_convfilter[1], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(Conv2D(n_convfilter[1], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_convfilter[1], (1, 1))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(MaxPooling2D((2, 2))))
+print(model.output_shape)
+
+model.add(TimeDistributed(Conv2D(n_convfilter[2], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(Conv2D(n_convfilter[2], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_convfilter[2], (1, 1))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(MaxPooling2D((2, 2))))
+print(model.output_shape)
+
+model.add(TimeDistributed(Conv2D(n_convfilter[3], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(Conv2D(n_convfilter[3], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(MaxPooling2D((2, 2))))
+print(model.output_shape)
+
+model.add(TimeDistributed(Conv2D(n_convfilter[4], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(Conv2D(n_convfilter[4], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_convfilter[4], (1, 1))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(MaxPooling2D((2, 2))))
+print(model.output_shape)
+
+model.add(TimeDistributed(Conv2D(n_convfilter[5], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(Conv2D(n_convfilter[5], (3, 3))))
+model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+model.add(TimeDistributed(MaxPooling2D((2, 2))))
+print(model.output_shape)
+
+model.add(ConvLSTM2D(n_convfilter[5], (1, 1), return_sequences=False))
+print(model.output_shape)
+
+model.add(Reshape((4, 4, 4, 64)))
+model.add(Conv3D(n_deconvfilter[0], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+model.add(Conv3D(n_deconvfilter[0], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+
+print(model.output_shape)
+model.add(Conv3D(n_deconvfilter[1], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+print(model.output_shape)
+model.add(Conv3D(n_deconvfilter[1], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+
+print(model.output_shape)
+model.add(Conv3D(n_deconvfilter[2], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+print(model.output_shape)
+model.add(Conv3D(n_deconvfilter[2], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+
+print(model.output_shape)
+model.add(Conv3D(n_deconvfilter[3], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+print(model.output_shape)
+model.add(Conv3D(n_deconvfilter[3], (3, 3, 3)))
+model.add(LeakyReLU(alpha=.01))
+model.add(UpSampling3D())
+## TARGET: 32 x 32 x 32 x 1
+
+#
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[1], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[1], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(UpSampling2D()))
+#
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[2], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[2], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(UpSampling2D()))
+#
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[3], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[3], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[3], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
+# model.add(TimeDistributed(UpSampling2D()))
+#
+# model.add(TimeDistributed(Conv2D(n_deconvfilter[3], (3, 3))))
+# model.add(TimeDistributed(LeakyReLU(alpha=.01)))
 
 
-print(model2.output_shape)
+print(model.output_shape)
 # encoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
 

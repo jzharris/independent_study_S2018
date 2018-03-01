@@ -28,3 +28,6 @@ Pokemon_GAN/*.md
 Pokemon_GAN/*.jpg
 
 models/
+
+3D-R2N2/ShapeNet/
+3D-R2N2/*.tgz
