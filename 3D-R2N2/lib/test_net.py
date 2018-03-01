@@ -60,7 +60,7 @@ def test_net():
 
         pred, loss, activations = solver.test_output(batch_img, batch_voxel)
 
-        if(batch_idx < 200):
+        if(batch_idx < cfg.TEST.EXPORT_NUM):
             # Save the prediction to an OBJ file (mesh file).
             voxel2obj('out/prediction{}.obj'.format(batch_idx), pred[0, :, 1, :, :] > cfg.TEST.VOXEL_THRESH)
         else:
