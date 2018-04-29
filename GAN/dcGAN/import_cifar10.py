@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from scipy.misc import toimage
 
 def import_cifar10(category=0, plot=False):
-    filter_train = np.load('datasets/cifar10/set_{}.npy'.format(category))
+    categories = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    filter_train = np.load('datasets/cifar10/set_{}.npy'.format(categories[category]))
 
     if(plot):
         images = filter_train[:16]
@@ -19,13 +20,13 @@ def import_cifar10(category=0, plot=False):
 
     return filter_train
 
-# import_cifar10(0, True)
-# import_cifar10(1, True)
-# import_cifar10(2, True)
-# import_cifar10(3, True)
-# import_cifar10(4, True)
-# import_cifar10(5, True)
-# import_cifar10(6, True)
-# import_cifar10(7, True)
-# import_cifar10(8, True)
-# import_cifar10(9, True)
+import_cifar10(0, True)
+import_cifar10(1, True)
+import_cifar10(2, True)
+import_cifar10(3, True)
+import_cifar10(4, True)
+import_cifar10(5, True)
+import_cifar10(6, True)
+import_cifar10(7, True)
+import_cifar10(8, True)
+import_cifar10(9, True)
